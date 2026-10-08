@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+client/.next/
+client/out/
+
+# Environment files (secrets) — keep the .example templates
+.env
+.env.*
+!.env.example
+!.env.local.example
+client/.env.local
+server/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime / tooling
+.nyc_output/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.eslintcache
+.cache/
+.vercel/
+
+# Uploads / exports / local data
+server/uploads/
+server/exports/
+*.rdb
+dump/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.suo
+
+# Claude Code local settings
+.claude/settings.local.json

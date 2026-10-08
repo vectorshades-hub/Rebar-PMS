@@ -1,0 +1,17 @@
+{
+  "name": "rebar-pms-client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 5006 -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -p 5006 -H 0.0.0.0",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.51.1",
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
