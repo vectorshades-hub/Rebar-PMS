@@ -12,6 +12,10 @@ export const money = (currency, n) =>
   `${currency} ${(Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 export const tons = (n) => (Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 export const coLabel = (c) => `${c.kind}${c.co_number}`;
+/** A CO is billed by the hour, a PO by the ton (both stored in tonnage / rate_per_ton). */
+export const coUnit = (kind) => (kind === "CO" ? "h" : "t");
+export const coQty = (c) => `${tons(c.tonnage)} ${coUnit(c.kind)}`;
+export const coRate = (c) => `${money(c.currency, c.rate_per_ton)} / ${coUnit(c.kind)}`;
 
 export function fmtDateTime(iso) {
   if (!iso) return "";

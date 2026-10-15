@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AppLayout from "../../components/AppLayout";
 import PageHero from "../../components/PageHero";
 import StatPill from "../../components/StatPill";
-import { CoFilterBar, SortTh, StatusPill, coLabel, fmtDateTime, money, tons, useCoFilters } from "../../components/CoDashboardShared";
+import { CoFilterBar, SortTh, StatusPill, coLabel, coQty, coRate, fmtDateTime, money, useCoFilters } from "../../components/CoDashboardShared";
 import { api, ApiError } from "../../lib/api";
 import { useToast } from "../../lib/ToastContext";
 
@@ -48,7 +48,7 @@ function FinanceDashboard() {
               <SortTh col="co" label="CO #" {...th} />
               <SortTh col="date" label="Date" {...th} />
               <SortTh col="change" label="Change Type" {...th} />
-              <SortTh col="tonnage" label="Tonnage" {...th} />
+              <SortTh col="tonnage" label="Hours / Tons" {...th} />
               <SortTh col="rate" label="Rate" {...th} />
               <SortTh col="total" label="Total" {...th} />
               <SortTh col="released" label="Released" {...th} />
@@ -63,8 +63,8 @@ function FinanceDashboard() {
                 <td className="fw-bold">{coLabel(c)}</td>
                 <td>{c.date}</td>
                 <td>{c.change}</td>
-                <td>{tons(c.tonnage)}</td>
-                <td>{money(c.currency, c.rate_per_ton)}</td>
+                <td>{coQty(c)}</td>
+                <td>{coRate(c)}</td>
                 <td className="fw-bold">{money(c.currency, c.total)}</td>
                 <td>
                   <div className="small fw-semibold">{c.released_by}</div>

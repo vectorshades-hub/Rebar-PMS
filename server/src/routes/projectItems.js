@@ -45,7 +45,7 @@ async function parseCo(b, project) {
   if (!CO_TYPES.includes(kind)) return { error: "Type must be CO or PO." };
   const tonnage = num(b.tonnage);
   const rate = num(b.rate_per_ton);
-  if (![tonnage, rate].every((n) => Number.isFinite(n) && n >= 0)) return { error: "Tonnage and amount must be non-negative numbers." };
+  if (![tonnage, rate].every((n) => Number.isFinite(n) && n >= 0)) return { error: `${kind === "CO" ? "Hours" : "Tonnage"} and amount must be non-negative numbers.` };
   const status = b.status === undefined || b.status === "" ? undefined : String(b.status);
   if (status !== undefined && !CO_STATUSES.includes(status)) return { error: "Invalid status." };
   return {

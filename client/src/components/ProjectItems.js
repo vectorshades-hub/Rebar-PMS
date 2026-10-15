@@ -171,6 +171,12 @@ const CO_STATUS = {
   finance_approved: { label: "Finance Approved", icon: "bi-bank", cls: "co-status-finance" },
 };
 const CURRENCIES = ["USD", "CAD", "EUR", "GBP", "INR", "AUD"];
+// A CO is billed by the hour, a PO by the ton (both stored in tonnage / rate_per_ton).
+const CO_UNIT = {
+  CO: { label: "Hours", unit: "h", per: "hour", placeholder: "0" },
+  PO: { label: "Tonnage", unit: "t", per: "ton", placeholder: "0.0" },
+};
+const coUnit = (kind) => CO_UNIT[kind] || CO_UNIT.PO;
 const blankCo = () => ({ kind: "CO", co_number: "", date: todayISO(), change: "", notes: "", linked_submissions: [], tonnage: "", currency: "USD", rate_per_ton: "", status: "pending" });
 
 export function ChangeOrdersPanel({ projectId, items, records, canWrite, canDelete, openSignal = 0 }) {
@@ -210,8 +216,8 @@ export function ChangeOrdersPanel({ projectId, items, records, canWrite, canDele
   }
   function exportCsv() {
     downloadCsv("co-po.csv", [
-      ["Type", "Number", "Date", "Change", "Status", "Tonnage", "Currency", "Rate per ton", "Total", "Notes", "Linked submissions", "Created by"],
-      ...items.map((c) => [c.kind, c.co_number, c.date, c.change, CO_STATUS[c.status]?.label, c.tonnage, c.currency, c.rate_per_ton, c.total, c.notes, c.linked_submissions.map((l) => `#${l.id}`).join(" "), c.created_by]),
+      ["Type", "Number", "Date", "Change", "Status", "Quantity", "Unit", "Currency", "Rate per unit", "Total", "Notes", "Linked submissions", "Created by"],
+      ...items.map((c) => [c.kind, c.co_number, c.date, c.change, CO_STATUS[c.status]?.label, c.tonnage, coUnit(c.kind).per, c.currency, c.rate_per_ton, c.total, c.notes, c.linked_submissions.map((l) => `#${l.id}`).join(" "), c.created_by]),
     ]);
   }
 
@@ -265,7 +271,9 @@ export function ChangeOrdersPanel({ projectId, items, records, canWrite, canDele
                 {c.notes && <div className="co-notes">{c.notes}</div>}
                 <div className="co-chip-row">
                   <span className="co-chip"><i className="bi bi-calendar3" /> <span className="co-chip-label">Date</span> {fmtDay(c.date)}</span>
-                  <span className="co-chip"><i className="bi bi-box-seam" /> <span className="co-chip-label">Tonnage</span> {tons(c.tonnage)} t</span>
+                  <span className="co-chip">
+                    <i className={`bi ${c.kind === "CO" ? "bi-clock" : "bi-box-seam"}`} /> <span className="co-chip-label">{coUnit(c.kind).label}</span> {tons(c.tonnage)} {coUnit(c.kind).unit}
+                  </span>
                   <span className="co-chip"><i className="bi bi-currency-dollar" /> <span className="co-chip-label">Total</span> {money(c.currency, c.total)}</span>
                 </div>
                 {c.linked_submissions.length > 0 && (
@@ -336,10 +344,10 @@ export function ChangeOrdersPanel({ projectId, items, records, canWrite, canDele
             <LinkedSubmissions records={records} value={form.linked_submissions} onChange={(v) => setForm((f) => ({ ...f, linked_submissions: v }))} />
             <div className="co-amount-grid">
               <div>
-                <label className="form-label fw-semibold">Tonnage</label>
+                <label className="form-label fw-semibold">{coUnit(form.kind).label}</label>
                 <div className="input-group">
-                  <input type="number" min="0" step="0.01" className="form-control" placeholder="0.0" value={form.tonnage} onChange={set("tonnage")} />
-                  <span className="input-group-text">t</span>
+                  <input type="number" min="0" step="0.01" className="form-control" placeholder={coUnit(form.kind).placeholder} value={form.tonnage} onChange={set("tonnage")} />
+                  <span className="input-group-text">{coUnit(form.kind).unit}</span>
                 </div>
               </div>
               <div>
@@ -349,7 +357,7 @@ export function ChangeOrdersPanel({ projectId, items, records, canWrite, canDele
                 </select>
               </div>
               <div>
-                <label className="form-label fw-semibold">Amount / ton</label>
+                <label className="form-label fw-semibold">Amount / {coUnit(form.kind).per}</label>
                 <input type="number" min="0" step="0.01" className="form-control" placeholder="0.00" value={form.rate_per_ton} onChange={set("rate_per_ton")} />
               </div>
               <div className="co-total-box">

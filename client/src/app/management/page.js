@@ -6,7 +6,7 @@ import AppLayout from "../../components/AppLayout";
 import PageHero from "../../components/PageHero";
 import StatPill from "../../components/StatPill";
 import Modal from "../../components/Modal";
-import { CoFilterBar, SortTh, StatusPill, coLabel, money, tons, useCoFilters } from "../../components/CoDashboardShared";
+import { CoFilterBar, SortTh, StatusPill, coLabel, coQty, coRate, money, useCoFilters } from "../../components/CoDashboardShared";
 import { api, ApiError } from "../../lib/api";
 import { useAuth } from "../../lib/AuthContext";
 import { useToast } from "../../lib/ToastContext";
@@ -75,7 +75,7 @@ function ManagementDashboard() {
               <SortTh col="co" label="CO #" {...th} />
               <SortTh col="date" label="Date" {...th} />
               <SortTh col="change" label="Change Type" {...th} />
-              <SortTh col="tonnage" label="Tonnage" {...th} />
+              <SortTh col="tonnage" label="Hours / Tons" {...th} />
               <SortTh col="rate" label="Rate" {...th} />
               <SortTh col="total" label="Total" {...th} />
               <SortTh col="status" label="Status" {...th} />
@@ -91,8 +91,8 @@ function ManagementDashboard() {
                 <td className="fw-bold">{coLabel(c)}</td>
                 <td>{c.date}</td>
                 <td>{c.change}</td>
-                <td>{tons(c.tonnage)}</td>
-                <td>{money(c.currency, c.rate_per_ton)}</td>
+                <td>{coQty(c)}</td>
+                <td>{coRate(c)}</td>
                 <td className="fw-bold">{money(c.currency, c.total)}</td>
                 <td><StatusPill status={c.status} /></td>
                 <td><InvoicePill value={c.invoice_released} /></td>

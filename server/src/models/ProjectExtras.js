@@ -15,6 +15,7 @@ const ChangeOrder = mongoose.model(
     change: { type: String, required: true, trim: true },
     notes: { type: String, default: "" },
     linkedSubmissions: { type: [Number], default: [] },
+    // Billed quantity and rate per unit: hours for a CO, tons for a PO.
     tonnage: { type: Number, default: 0, min: 0 },
     currency: { type: String, default: "USD" },
     ratePerTon: { type: Number, default: 0, min: 0 },
