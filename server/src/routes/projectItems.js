@@ -3,7 +3,7 @@ const createSafeRouter = require("../utils/safeRouter");
 const { Project, Record, ChangeOrder, Rfi, ProjectImage } = require("../models");
 const { CO_STATUSES, CO_TYPES, RFI_TYPES } = require("../models/ProjectExtras");
 const statusEngine = require("../services/statusEngine");
-const { can } = require("../services/permissions");
+const { can, canViewAmounts } = require("../services/permissions");
 const { canDeleteRecords } = require("../services/settingsService");
 const { requireAuth } = require("../middleware/auth");
 
@@ -36,7 +36,8 @@ async function validLinks(project, raw) {
 const num = (v) => (v === undefined || v === null || v === "" ? 0 : Number(v));
 
 // ── CO / PO ───────────────────────────────────────────────────────────────
-async function parseCo(b, project) {
+/** `withAmounts: false` leaves currency / rate untouched (model defaults on create, existing values on update). */
+async function parseCo(b, project, { withAmounts = true } = {}) {
   const coNumber = String(b.co_number || "").trim();
   const change = String(b.change || "").trim();
   const date = statusEngine.parseDate(b.date);
@@ -44,7 +45,7 @@ async function parseCo(b, project) {
   const kind = String(b.kind || "CO");
   if (!CO_TYPES.includes(kind)) return { error: "Type must be CO or PO." };
   const tonnage = num(b.tonnage);
-  const rate = num(b.rate_per_ton);
+  const rate = withAmounts ? num(b.rate_per_ton) : 0;
   if (![tonnage, rate].every((n) => Number.isFinite(n) && n >= 0)) return { error: `${kind === "CO" ? "Hours" : "Tonnage"} and amount must be non-negative numbers.` };
   const status = b.status === undefined || b.status === "" ? undefined : String(b.status);
   if (status !== undefined && !CO_STATUSES.includes(status)) return { error: "Invalid status." };
@@ -56,8 +57,9 @@ async function parseCo(b, project) {
       change,
       notes: String(b.notes || "").trim(),
       tonnage: Math.round(tonnage * 100) / 100,
-      ratePerTon: rate,
-      currency: String(b.currency || "USD").trim().toUpperCase().slice(0, 5) || "USD",
+      ...(withAmounts
+        ? { ratePerTon: rate, currency: String(b.currency || "USD").trim().toUpperCase().slice(0, 5) || "USD" }
+        : {}),
       linkedSubmissions: await validLinks(project, b.linked_submissions),
       ...(status ? { status } : {}),
     },
@@ -65,7 +67,7 @@ async function parseCo(b, project) {
 }
 
 router.post("/:id/change-orders", requireAuth, mayWrite, loadProject, async (req, res) => {
-  const { fields, error } = await parseCo(req.body, req.project);
+  const { fields, error } = await parseCo(req.body, req.project, { withAmounts: canViewAmounts(req.session.role) });
   if (error) return fail(res, 400, error);
   const co = await ChangeOrder.create({ ...fields, project: req.project._id, createdBy: req.session.username });
   res.json({ ok: true, message: `${co.kind} ${co.coNumber} created.`, id: String(co._id) });
@@ -73,7 +75,7 @@ router.post("/:id/change-orders", requireAuth, mayWrite, loadProject, async (req
 
 router.put("/:id/change-orders/:itemId", requireAuth, mayWrite, loadProject, async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.itemId)) return fail(res, 404, "Not found.");
-  const { fields, error } = await parseCo(req.body, req.project);
+  const { fields, error } = await parseCo(req.body, req.project, { withAmounts: canViewAmounts(req.session.role) });
   if (error) return fail(res, 400, error);
   const co = await ChangeOrder.findOneAndUpdate({ _id: req.params.itemId, project: req.project._id }, { $set: fields });
   if (!co) return fail(res, 404, "Not found.");

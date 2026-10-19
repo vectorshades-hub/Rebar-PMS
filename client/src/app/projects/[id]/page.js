@@ -227,7 +227,7 @@ function ProjectDetail({ id }) {
           </div>
 
           <div className="co-rfi-row">
-            <ChangeOrdersPanel openSignal={coSignal} projectId={project.id} items={changeOrders} records={records} canWrite={!!perms.addRecords} canDelete={!!perms.deleteRecords} />
+            <ChangeOrdersPanel openSignal={coSignal} projectId={project.id} items={changeOrders} records={records} canWrite={!!perms.addRecords} canDelete={!!perms.deleteRecords} canViewAmounts={!!perms.viewAmounts} />
             <RfiPanel openSignal={rfiSignal} projectId={project.id} items={rfis} records={records} canWrite={!!perms.addRecords} canDelete={!!perms.deleteRecords} />
           </div>
         </div>

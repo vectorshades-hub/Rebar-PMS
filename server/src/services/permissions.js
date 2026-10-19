@@ -15,6 +15,9 @@ function can(role, action) {
   return !!(ROLES[role] && ROLES[role][action]);
 }
 
+/** CO/PO money (currency, rate, total) is visible / editable only by admin and management. */
+const canViewAmounts = (role) => ["admin", "management"].includes(role);
+
 /** Everything the client needs to show/hide controls for this user. */
 async function permissionsFor(userId, role) {
   return {
@@ -24,7 +27,8 @@ async function permissionsFor(userId, role) {
     editInvoiceReleased: await settingsService.canEditInvoiceReleased(userId, role),
     editCompletedLog: await settingsService.canEditCompletedLog(userId, role),
     viewFinance: ["admin", "finance"].includes(role),
+    viewAmounts: canViewAmounts(role),
   };
 }
 
-module.exports = { can, permissionsFor };
+module.exports = { can, canViewAmounts, permissionsFor };

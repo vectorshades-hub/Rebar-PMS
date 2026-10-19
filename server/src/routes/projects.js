@@ -3,7 +3,7 @@ const createSafeRouter = require("../utils/safeRouter");
 const { Project, Client, Record, ChangeOrder, Rfi, ProjectImage } = require("../models");
 const { serializeChangeOrder, serializeRfi } = require("../services/projectItems");
 const { loadRecords } = require("../services/recordVisibility");
-const { can } = require("../services/permissions");
+const { can, canViewAmounts } = require("../services/permissions");
 const { getManagementScope } = require("../services/userHelpers");
 const { requireAuth } = require("../middleware/auth");
 
@@ -187,7 +187,7 @@ router.get("/:id", requireAuth, async (req, res) => {
     },
     summary: summarize(records),
     records,
-    change_orders: cos.map((c) => serializeChangeOrder(c, byLegacyId)),
+    change_orders: cos.map((c) => serializeChangeOrder(c, byLegacyId, { withAmounts: canViewAmounts(role) })),
     rfis: rfis.map((r) => serializeRfi(r, byLegacyId)),
     image: image ? { filename: image.filename || "", version: new Date(image.updatedAt).getTime() } : null,
   });

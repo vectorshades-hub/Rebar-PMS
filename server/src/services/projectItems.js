@@ -12,8 +12,9 @@ function linked(ids, recordsByLegacyId) {
   });
 }
 
-function serializeChangeOrder(c, recordsByLegacyId = new Map()) {
-  return {
+/** `withAmounts: false` drops currency / rate / total (see permissions.canViewAmounts). */
+function serializeChangeOrder(c, recordsByLegacyId = new Map(), { withAmounts = true } = {}) {
+  const out = {
     id: String(c._id),
     kind: c.kind || "CO",
     co_number: c.coNumber,
@@ -29,6 +30,12 @@ function serializeChangeOrder(c, recordsByLegacyId = new Map()) {
     created_at: c.createdAt ? new Date(c.createdAt).toISOString() : "",
     linked_submissions: linked(c.linkedSubmissions, recordsByLegacyId),
   };
+  if (!withAmounts) {
+    delete out.currency;
+    delete out.rate_per_ton;
+    delete out.total;
+  }
+  return out;
 }
 
 /** returned = every question answered; overdue = not returned and past the expected response date. */
